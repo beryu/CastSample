@@ -23,7 +23,10 @@ class CastService: NSObject {
     // MARK: - Internal methods
     
     func scanDevices() {
+        // Receiverデバイスを検索（Receiver App Idによるフィルター有）
         self.deviceScanner = GCKDeviceScanner(filterCriteria: GCKFilterCriteria(forAvailableApplicationWithID: self.receiverAppId))
+
+        // 検索開始
         if let deviceScanner = self.deviceScanner {
             deviceScanner.addListener(self)
             deviceScanner.startScan()
@@ -37,6 +40,14 @@ class CastService: NSObject {
         self.connectedBlock = finishedBlock
         deviceManager.delegate = self
         deviceManager.connect()
+    }
+    
+    func disconnect() {
+        guard let deviceManager = self.deviceManager else {
+            return
+        }
+        deviceManager.leaveApplication()
+        deviceManager.disconnect()
     }
     
     func generateMediaInformation(track: EntityTrack) -> GCKMediaInformation {

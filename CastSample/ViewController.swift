@@ -36,7 +36,12 @@ class ViewController: UIViewController {
         guard let tracks = self.tracks else {
             return
         }
-        self.connect(tracks: tracks, startIndex: 0)
+        let connectionState = CastService.sharedService.deviceManager?.applicationConnectionState ?? .Disconnected
+        if connectionState == .Connected {
+            CastService.sharedService.disconnect()
+        } else {
+            self.connect(tracks: tracks, startIndex: 0)
+        }
     }
     
     private func connect(tracks tracks: [EntityTrack], startIndex: UInt) {
@@ -44,9 +49,7 @@ class ViewController: UIViewController {
             return
         }
         let connectionState = CastService.sharedService.deviceManager?.applicationConnectionState ?? .Disconnected
-        if connectionState == .Connected {
-            CastService.sharedService.load(items: CastService.sharedService.generateMediaQueueItems(tracks), startIndex: startIndex)
-        } else {
+        if connectionState != .Connected {
             // Show device selector
             guard
                 let deviceScanner = CastService.sharedService.deviceScanner,
@@ -86,16 +89,6 @@ class ViewController: UIViewController {
             presentViewController(alertController, animated: true, completion: nil)
         }
     }
-    @IBAction func castPlayButtonWasTapped(sender: AnyObject) {
-        guard let mediaStatus = CastService.sharedService.mediaControlChannel.mediaStatus else {
-            return
-        }
-        if mediaStatus.playerState == .Playing {
-            CastService.sharedService.mediaControlChannel.pause()
-        } else {
-            CastService.sharedService.mediaControlChannel.play()
-        }
-    }
 }
 
 // MARK: - UITableViewDataSource
@@ -129,6 +122,11 @@ extension ViewController: UITableViewDelegate {
         guard let tracks = self.tracks else {
             return
         }
-        self.connect(tracks: tracks, startIndex: UInt(indexPath.row))
+        let connectionState = CastService.sharedService.deviceManager?.applicationConnectionState ?? .Disconnected
+        if connectionState == .Connected {
+            CastService.sharedService.load(items: CastService.sharedService.generateMediaQueueItems(tracks), startIndex: UInt(indexPath.row))
+        } else {
+            NSLog("Not connected with Receiver")
+        }
     }
 }

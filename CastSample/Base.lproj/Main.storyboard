@@ -41,7 +41,7 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="3YY-s9-x1e"/>
                                     <constraint firstAttribute="height" constant="44" id="Q96-45-NbG"/>
                                 </constraints>
-                                <state key="normal" title="Start Casting"/>
+                                <state key="normal" title="Switch Casting"/>
                                 <connections>
                                     <action selector="castButtonWasTapped" destination="BYZ-38-t0r" eventType="touchUpInside" id="IFY-nv-cAV"/>
                                 </connections>
