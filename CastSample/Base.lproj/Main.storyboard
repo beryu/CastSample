@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="CastSample" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="7ey-JQ-CNa">
+                                <rect key="frame" x="0.0" y="20" width="600" height="536"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="FF1-d8-IH5">
+                                        <rect key="frame" x="0.0" y="28" width="600" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="FF1-d8-IH5" id="HTI-Wa-xXh">
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="6PG-R5-ToB"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="a3V-ab-Fs2"/>
+                                </connections>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fgp-bV-R56">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="3YY-s9-x1e"/>
+                                    <constraint firstAttribute="height" constant="44" id="Q96-45-NbG"/>
+                                </constraints>
+                                <state key="normal" title="Start Casting"/>
+                                <connections>
+                                    <action selector="castButtonWasTapped" destination="BYZ-38-t0r" eventType="touchUpInside" id="IFY-nv-cAV"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="7ey-JQ-CNa" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="9ZP-Bg-ymO"/>
+                            <constraint firstItem="7ey-JQ-CNa" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Dd9-bH-44D"/>
+                            <constraint firstAttribute="trailing" secondItem="fgp-bV-R56" secondAttribute="trailing" id="Dqb-90-hcG"/>
+                            <constraint firstAttribute="trailing" secondItem="7ey-JQ-CNa" secondAttribute="trailing" id="JLJ-1d-tZs"/>
+                            <constraint firstItem="fgp-bV-R56" firstAttribute="top" secondItem="7ey-JQ-CNa" secondAttribute="bottom" id="Vfk-j7-e0a"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="fgp-bV-R56" secondAttribute="bottom" id="hTH-C5-CTC"/>
+                            <constraint firstItem="fgp-bV-R56" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="mJN-CY-B2o"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="castButton" destination="fgp-bV-R56" id="Sxs-8f-eCX"/>
+                        <outlet property="tableView" destination="7ey-JQ-CNa" id="740-ji-qav"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="222" y="556"/>
+        </scene>
+    </scenes>
+</document>
