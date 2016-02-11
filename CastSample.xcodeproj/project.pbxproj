@@ -10,7 +10,6 @@
 		64502EC32EE50C144E115A17 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E2F0898F82C2E5EEC6E715B /* libPods.a */; };
 		877C6FA91C579074005FFD56 /* DataSourceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877C6FA81C579074005FFD56 /* DataSourceService.swift */; };
 		877C6FAB1C5790F7005FFD56 /* EntityTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877C6FAA1C5790F7005FFD56 /* EntityTrack.swift */; };
-		877C6FAD1C579C3B005FFD56 /* CastService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877C6FAC1C579C3B005FFD56 /* CastService.swift */; };
 		877C6FAF1C57A03A005FFD56 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 877C6FAE1C57A03A005FFD56 /* Accelerate.framework */; };
 		877C6FB11C57A040005FFD56 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 877C6FB01C57A040005FFD56 /* AudioToolbox.framework */; };
 		877C6FB31C57A049005FFD56 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 877C6FB21C57A049005FFD56 /* AVFoundation.framework */; };
@@ -32,7 +31,6 @@
 		0E2F0898F82C2E5EEC6E715B /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		877C6FA81C579074005FFD56 /* DataSourceService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataSourceService.swift; sourceTree = "<group>"; };
 		877C6FAA1C5790F7005FFD56 /* EntityTrack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EntityTrack.swift; sourceTree = "<group>"; };
-		877C6FAC1C579C3B005FFD56 /* CastService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CastService.swift; sourceTree = "<group>"; };
 		877C6FAE1C57A03A005FFD56 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		877C6FB01C57A040005FFD56 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		877C6FB21C57A049005FFD56 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -96,7 +94,6 @@
 			children = (
 				877C6FA81C579074005FFD56 /* DataSourceService.swift */,
 				877C6FAA1C5790F7005FFD56 /* EntityTrack.swift */,
-				877C6FAC1C579C3B005FFD56 /* CastService.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -266,7 +263,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				87AA72DF1C565AFE001A78A0 /* ViewController.swift in Sources */,
-				877C6FAD1C579C3B005FFD56 /* CastService.swift in Sources */,
 				877C6FA91C579074005FFD56 /* DataSourceService.swift in Sources */,
 				877C6FAB1C5790F7005FFD56 /* EntityTrack.swift in Sources */,
 				87AA72DD1C565AFE001A78A0 /* AppDelegate.swift in Sources */,
