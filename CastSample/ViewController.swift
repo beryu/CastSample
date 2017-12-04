@@ -200,6 +200,11 @@ extension ViewController: GCKSessionManagerListener {
 
 extension ViewController: GCKLoggerDelegate {
     func logMessage(_ message: String, at level: GCKLoggerLevel, fromFunction function: String, location: String) {
-        NSLog("\(function) \(message)")
+        switch level {
+        case .error, .assert:
+            NSLog("\(function) \(message)")
+        default:
+            break
+        }
     }
 }
