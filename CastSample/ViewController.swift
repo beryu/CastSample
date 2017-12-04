@@ -16,25 +16,27 @@ class ViewController: UIViewController {
     @IBOutlet weak var castButton: UIButton!
     
     // for Google Cast
-    private var deviceScanner: GCKDeviceScanner?
     private var connectedBlock: (() -> Void)?
-    private var deviceManager: GCKDeviceManager?
-    private let mediaControlChannel: GCKMediaControlChannel = GCKMediaControlChannel()
-    private let receiverAppId: String = "YOUR_RECEIVER_APP_ID"
+    private let receiverAppId: String = "4CE4B3B9"
     
     // MARK: - Override methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        // Initialize shared instance of GCKCastContext
+        let criteria = GCKDiscoveryCriteria(applicationID: self.receiverAppId)
+        let options = GCKCastOptions(discoveryCriteria: criteria)
+        GCKCastContext.setSharedInstanceWith(options)
+        GCKLogger.sharedInstance().delegate = self
+        GCKCastContext.sharedInstance().sessionManager.add(self)
+
         DataSourceService.sharedService.load(completion: { (tracks: [EntityTrack]?) -> Void in
             self.tracks = tracks
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            DispatchQueue.main.async {
                 self.tableView.reloadData()
-            })
+            }
         })
-        
-        self.scanDevices()
     }
     
     // MARK: - Private methods
@@ -43,60 +45,54 @@ class ViewController: UIViewController {
         guard let tracks = self.tracks else {
             return
         }
-        let connectionState = self.deviceManager?.applicationConnectionState ?? .Disconnected
-        if connectionState == .Connected {
+        if GCKCastContext.sharedInstance().castState == .connected {
             self.disconnect()
         } else {
             self.connect(tracks: tracks, startIndex: 0)
         }
     }
-    
-    private func connect(tracks tracks: [EntityTrack], startIndex: UInt) {
+
+    private func connect(tracks: [EntityTrack], startIndex: UInt) {
         if tracks.count == 0 {
             return
         }
-        let connectionState = self.deviceManager?.applicationConnectionState ?? .Disconnected
-        if connectionState != .Connected {
+        if GCKCastContext.sharedInstance().castState != .connected {
             // Show device selector
-            guard
-                let deviceScanner = self.deviceScanner,
-                let devices = deviceScanner.devices as? [GCKDevice] else {
-                    return
+            let discoveryManager = GCKCastContext.sharedInstance().discoveryManager
+            guard discoveryManager.deviceCount > 0 else {
+                return
             }
-            
-            self.castButton.hidden = true
-            
-            let alertController = UIAlertController(title: nil, message: "Select device to cast", preferredStyle: .ActionSheet)
-            deviceScanner.passiveScan = false
+            let devices: [GCKDevice] = stride(from: 0, to: discoveryManager.deviceCount, by: 1).map { discoveryManager.device(at: $0) }
+
+            self.castButton.isHidden = true
+
+            let alertController = UIAlertController(title: nil, message: "Select device to cast", preferredStyle: .actionSheet)
             for device in devices {
                 alertController.addAction(
                     UIAlertAction(
                         title: device.friendlyName,
-                        style: .Default,
+                        style: .default,
                         handler: { (action: UIAlertAction) -> Void in
-                            
+
                             // Connect with device
                             self.connect(device: device, finishedBlock: { [weak self] () -> Void in
                                 guard let me = self else {
                                     return
                                 }
-                                me.load(items: me.generateMediaQueueItems(tracks), startIndex: startIndex)
+                                me.load(items: me.generateMediaQueueItems(tracks: tracks), startIndex: startIndex)
                             })
-                            
-                            deviceScanner.passiveScan = true
-                            self.castButton.hidden = false
+
+                            self.castButton.isHidden = false
                     }))
             }
             alertController.addAction(
                 UIAlertAction(
                     title: "キャンセル",
-                    style: .Cancel,
+                    style: .cancel,
                     handler: { (action: UIAlertAction) -> Void in
-                        
-                        deviceScanner.passiveScan = true
-                        self.castButton.hidden = false
+                        self.castButton.isHidden = false
                 }))
-            presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
     }
 }
@@ -108,17 +104,17 @@ extension ViewController: UITableViewDataSource {
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.tracks?.count ?? 0
     }
 
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         guard let track = self.tracks?[indexPath.row] else {
             return UITableViewCell()
         }
         
-        let cell = self.tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.textLabel?.text = track.trackName
         return cell
     }
@@ -127,14 +123,13 @@ extension ViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 
 extension ViewController: UITableViewDelegate {
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.deselectRow(at: indexPath, animated: true)
         guard let tracks = self.tracks else {
             return
         }
-        let connectionState = self.deviceManager?.applicationConnectionState ?? .Disconnected
-        if connectionState == .Connected {
-            self.load(items: self.generateMediaQueueItems(tracks), startIndex: UInt(indexPath.row))
+        if GCKCastContext.sharedInstance().castState == .connected {
+            self.load(items: self.generateMediaQueueItems(tracks: tracks), startIndex: UInt(indexPath.row))
         } else {
             NSLog("Not connected with Receiver")
         }
@@ -146,52 +141,34 @@ extension ViewController {
     
     // MARK: - Internal methods
     
-    func scanDevices() {
-        // Receiverデバイスを検索（Receiver App Idによるフィルター有）
-        self.deviceScanner = GCKDeviceScanner(filterCriteria: GCKFilterCriteria(forAvailableApplicationWithID: self.receiverAppId))
-        
-        // 検索開始
-        if let deviceScanner = self.deviceScanner {
-            deviceScanner.addListener(self)
-            deviceScanner.startScan()
-            deviceScanner.passiveScan = true
-        }
-    }
-    
-    func connect(device device: GCKDevice, finishedBlock: (() -> Void)?) {
-        let deviceManager = GCKDeviceManager(device: device, clientPackageName: NSBundle.mainBundle().bundleIdentifier)
-        self.deviceManager = deviceManager
+    func connect(device: GCKDevice, finishedBlock: (() -> Void)?) {
         self.connectedBlock = finishedBlock
-        deviceManager.delegate = self
-        deviceManager.connect()
+        GCKCastContext.sharedInstance().sessionManager.startSession(with: device)
     }
     
     func disconnect() {
-        guard let deviceManager = self.deviceManager else {
-            return
-        }
-        deviceManager.leaveApplication()
-        deviceManager.disconnect()
+        GCKCastContext.sharedInstance().sessionManager.endSessionAndStopCasting(true)
     }
     
     func generateMediaInformation(track: EntityTrack) -> GCKMediaInformation {
-        let metadata = GCKMediaMetadata()
+        let metadata = GCKMediaMetadata(metadataType: .musicTrack)
         metadata.setString(track.trackName, forKey: kGCKMetadataKeyTitle)
         metadata.setString(track.artistName, forKey: kGCKMetadataKeyArtist)
         metadata.setString(track.albumName, forKey: kGCKMetadataKeyAlbumTitle)
-        if let url = NSURL(string: track.imageURLString) {
-            metadata.addImage(GCKImage(URL: url, width: track.imageHeight, height: track.imageHeight))
+        if let url = URL(string: track.imageURLString) {
+            metadata.addImage(GCKImage(url: url, width: track.imageHeight, height: track.imageHeight))
         }
-        
-        return GCKMediaInformation(
-            contentID: track.previewURLString,
-            streamType: GCKMediaStreamType.Buffered,
-            contentType: track.type,
-            metadata: metadata,
-            streamDuration: track.durationInSeconds,
-            customData: nil)
+
+        return GCKMediaInformation(contentID: track.previewURLString,
+                                   streamType: .buffered,
+                                   contentType: track.type,
+                                   metadata: metadata,
+                                   streamDuration: track.durationInSeconds,
+                                   mediaTracks: nil,
+                                   textTrackStyle: nil,
+                                   customData: nil)
     }
-    
+
     func generateMediaQueueItems(tracks: [EntityTrack]) -> [GCKMediaQueueItem] {
         var mediaQueueItems: [GCKMediaQueueItem] = []
         for track in tracks {
@@ -199,57 +176,30 @@ extension ViewController {
             queueItemBuilder.startTime = 0
             queueItemBuilder.autoplay = true
             queueItemBuilder.preloadTime = 20
-            queueItemBuilder.mediaInformation = self.generateMediaInformation(track)
+            queueItemBuilder.mediaInformation = self.generateMediaInformation(track: track)
             mediaQueueItems.append(queueItemBuilder.build())
         }
         
         return mediaQueueItems
     }
     
-    func load(information information: GCKMediaInformation) {
-        self.deviceManager?.addChannel(self.mediaControlChannel)
-        self.mediaControlChannel.loadMedia(information)
-    }
-    
-    func load(items items: [GCKMediaQueueItem], startIndex: UInt) {
-        self.deviceManager?.addChannel(self.mediaControlChannel)
-        self.mediaControlChannel.queueLoadItems(items, startIndex: startIndex, playPosition: 0, repeatMode: .Off, customData: nil)
+    func load(items: [GCKMediaQueueItem], startIndex: UInt) {
+        guard let castSession = GCKCastContext.sharedInstance().sessionManager.currentCastSession else {
+            return
+        }
+        castSession.remoteMediaClient?.queueLoad(items, start: startIndex, repeatMode: .off)
     }
 }
 
-extension ViewController: GCKDeviceScannerListener {
-    /**
-     * Called when a device has been discovered or has come online.
-     */
-    func deviceDidComeOnline(device: GCKDevice!) {
-        NSLog("GoogleCast receiver is detected!")
-    }
-    
-    /**
-     * Called when a device has gone offline.
-     */
-    func deviceDidGoOffline(device: GCKDevice!) {
-        NSLog("GoogleCast has gone offline.")
-    }
-    
-}
-
-extension ViewController: GCKDeviceManagerDelegate {
-    /**
-     * Called when a connection has been established to the device.
-     */
-    func deviceManagerDidConnect(deviceManager: GCKDeviceManager!) {
-        NSLog("Connected with GoogleCast device.")
-        
-        self.deviceManager?.launchApplication(self.receiverAppId)
-    }
-    
-    /**
-     * Called when an application has been launched or joined.
-     */
-    func deviceManager(deviceManager: GCKDeviceManager!, didConnectToCastApplication applicationMetadata: GCKApplicationMetadata!, sessionID: String!, launchedApplication: Bool) {
-        NSLog("Connected with GoogleCast receiver application.")
-        
+extension ViewController: GCKSessionManagerListener {
+    func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
         self.connectedBlock?()
+        self.connectedBlock = nil
+    }
+}
+
+extension ViewController: GCKLoggerDelegate {
+    func logMessage(_ message: String, at level: GCKLoggerLevel, fromFunction function: String, location: String) {
+        NSLog("\(function) \(message)")
     }
 }

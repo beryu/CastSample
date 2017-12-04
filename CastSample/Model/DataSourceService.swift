@@ -17,21 +17,21 @@ class DataSourceService: NSObject {
     
     private let jsonURLString = "https://itunes.apple.com/jp/rss/topsongs/limit=20/json"
     
-    func load(completion completion: (([EntityTrack]?) -> Void)?) {
+    func load(completion: (([EntityTrack]?) -> Void)?) {
         // Request JSON
-        guard let jsonURL = NSURL(string: self.jsonURLString) else {
+        guard let jsonURL = URL(string: self.jsonURLString) else {
             return
         }
-        let request = NSMutableURLRequest(URL: jsonURL)
-        request.HTTPMethod = "GET"
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { (data: NSData?, response: NSURLResponse?, error: NSError?) -> Void in
-            guard let data = data where error == nil else {
+        var request = URLRequest(url: jsonURL)
+        request.httpMethod = "GET"
+        let task = URLSession.shared.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
+            guard let data = data, error == nil else {
                 completion?(nil)
                 return
             }
             
             do {
-                let json = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+                let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String: AnyObject]
                 
                 guard
                     let feed = json["feed"] as? [String: AnyObject],
@@ -81,7 +81,7 @@ class DataSourceService: NSObject {
                                 let attributeDict = image["attributes"] as? [String: String],
                                 let path = image["label"] as? String,
                                 let heightStr = attributeDict["height"],
-                                let height = Int(heightStr) where height > maxHeight {
+                                let height = Int(heightStr), height > maxHeight {
                                     maxHeight = height
                                     imageURLString = path
                             }
@@ -100,7 +100,7 @@ class DataSourceService: NSObject {
                                     track.durationInSeconds = Double(duration) / 1000 // Convert to seconds from milliseconds
                             }
                             
-                            if let attributeDict = linkDict["attributes"] as? [String: String] where attributeDict["im:assetType"] != nil {
+                            if let attributeDict = linkDict["attributes"] as? [String: String], attributeDict["im:assetType"] != nil {
                                 // Type
                                 if let type = attributeDict["type"] {
                                     track.type = type
